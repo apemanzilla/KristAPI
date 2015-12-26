@@ -16,18 +16,22 @@ import me.apemanzilla.utils.net.HTTPGET;
  */
 public class KristAPI {
 
+	private static URL syncnode;
+	
+	static {
+		try {
+			syncnode = new URL(HTTPGET.readUrl(new URL("https://raw.githubusercontent.com/BTCTaras/kristwallet/master/staticapi/syncNode")));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Gets the syncnode URL from the official GitHub repository
 	 * @return The syncnode URL
 	 */
 	public static URL getSyncNode() {
-		try {
-			return new URL(HTTPGET.readUrl(
-					new URL("https://raw.githubusercontent.com/BTCTaras/kristwallet/master/staticapi/syncNode")));
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return syncnode;
 	}
 
 	/**

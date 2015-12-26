@@ -1,9 +1,10 @@
-package me.apemanzilla.kristapi;
+package me.apemanzilla.kristapi.types;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import me.apemanzilla.kristapi.KristAPI;
 import me.apemanzilla.kristapi.exceptions.InvalidKristKeyException;
 import me.apemanzilla.kristapi.exceptions.SyncnodeDownException;
 import me.apemanzilla.utils.net.HTTPGET;
@@ -14,14 +15,13 @@ public abstract class KristAddress {
 
 	public long getBalance() throws SyncnodeDownException, MalformedURLException {
 		try {
-			String got = HTTPGET.readUrl(new URL(KristAPI.getSyncNode(),"?getbalance=" + this.getAddress()));
+			String got = HTTPGET.readUrl(new URL(KristAPI.getSyncNode(), "?getbalance=" + this.getAddress()));
 			got = got.replaceAll("[^\\d.]", "");
 			return Long.parseLong(got);
 		} catch (MalformedURLException e) {
 			throw e;
 		} catch (IOException e) {
-			e.printStackTrace();
-			throw new SyncnodeDownException("Go yell at Taras a bit.");
+			throw new SyncnodeDownException("Krist is down; go yell at Taras a bit.");
 		}
 	}
 	
