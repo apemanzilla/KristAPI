@@ -8,7 +8,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import me.apemanzilla.utils.net.HTTPGET;
 
 /**
- * General/miscellaneous methods for Krist Unless otherwise specified, all
+ * General/miscellaneous methods for Krist. Unless otherwise specified, all
  * methods here will block until completion
  * 
  * @author apemanzilla
@@ -16,14 +16,20 @@ import me.apemanzilla.utils.net.HTTPGET;
  */
 public class KristAPI {
 
-	private static URL syncnode;
+	private static volatile URL syncnode;
 	
 	static {
-		try {
-			syncnode = new URL(HTTPGET.readUrl(new URL("https://raw.githubusercontent.com/BTCTaras/kristwallet/master/staticapi/syncNode")));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		Thread syncnodethread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					syncnode = new URL(HTTPGET.readUrl(new URL("https://raw.githubusercontent.com/BTCTaras/kristwallet/master/staticapi/syncNode")));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		syncnodethread.run();
 	}
 	
 	/**
@@ -31,6 +37,8 @@ public class KristAPI {
 	 * @return The syncnode URL
 	 */
 	public static URL getSyncNode() {
+		// wait in case syncnode is not known yet
+		while (syncnode == null) {}
 		return syncnode;
 	}
 
@@ -93,4 +101,6 @@ public class KristAPI {
 		}
 		return v2;
 	}
+	
+	
 }
