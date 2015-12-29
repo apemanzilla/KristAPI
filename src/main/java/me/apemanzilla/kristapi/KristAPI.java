@@ -5,6 +5,7 @@ import java.net.URL;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import me.apemanzilla.kristapi.exceptions.SyncnodeDownException;
 import me.apemanzilla.utils.net.HTTPGET;
 
 /**
@@ -12,7 +13,7 @@ import me.apemanzilla.utils.net.HTTPGET;
  * methods here will block until completion
  * 
  * @author apemanzilla
- *
+ * @see me.apemanzilla.kristapi.types.KristAddress
  */
 public class KristAPI {
 
@@ -42,6 +43,16 @@ public class KristAPI {
 		return syncnode;
 	}
 
+	public static long getWork() throws SyncnodeDownException {
+		try {
+			String got = HTTPGET.readUrl(new URL(KristAPI.getSyncNode(), "?getwork"));
+			got = got.replaceAll("[^\\d.]", "");
+			return Long.parseLong(got);
+		} catch (IOException e) {
+			throw new SyncnodeDownException();
+		}
+	}
+	
 	/**
 	 * Generates the key for an address
 	 * @param password The password
