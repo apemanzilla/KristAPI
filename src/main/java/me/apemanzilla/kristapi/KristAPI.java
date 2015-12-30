@@ -53,6 +53,15 @@ public class KristAPI {
 		}
 	}
 	
+	public static String getBlock() throws SyncnodeDownException {
+		try {
+			String got = HTTPGET.readUrl(new URL(KristAPI.getSyncNode(), "?lastblock"));
+			return got;
+		} catch (IOException e) {
+			throw new SyncnodeDownException();
+		}
+	}
+	
 	/**
 	 * Generates the key for an address
 	 * @param password The password
