@@ -5,6 +5,7 @@ import java.net.URL;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import me.apemanzilla.kristapi.exceptions.RemoteErrorException;
 import me.apemanzilla.kristapi.exceptions.SyncnodeDownException;
 import me.apemanzilla.utils.net.HTTPGET;
 
@@ -43,9 +44,12 @@ public class KristAPI {
 		return syncnode;
 	}
 
-	public static long getWork() throws SyncnodeDownException {
+	public static long getWork() throws SyncnodeDownException, RemoteErrorException {
 		try {
 			String got = HTTPGET.readUrl(new URL(KristAPI.getSyncNode(), "?getwork"));
+			if (got.contains("error")) {
+				throw new RemoteErrorException();
+			}
 			got = got.replaceAll("[^\\d.]", "");
 			return Long.parseLong(got);
 		} catch (IOException e) {
@@ -53,9 +57,12 @@ public class KristAPI {
 		}
 	}
 	
-	public static String getBlock() throws SyncnodeDownException {
+	public static String getBlock() throws SyncnodeDownException, RemoteErrorException {
 		try {
 			String got = HTTPGET.readUrl(new URL(KristAPI.getSyncNode(), "?lastblock"));
+			if (got.contains("error")) {
+				throw new RemoteErrorException();
+			}
 			return got;
 		} catch (IOException e) {
 			throw new SyncnodeDownException();
