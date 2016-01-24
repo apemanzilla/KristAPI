@@ -7,4 +7,5 @@ repositories {
 
 dependencies {
 	compile 'commons-codec:commons-codec:1.10'
+	compile 'org.json:json:20151123'
 }
