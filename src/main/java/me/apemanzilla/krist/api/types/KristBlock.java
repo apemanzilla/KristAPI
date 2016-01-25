@@ -46,6 +46,10 @@ public class KristBlock {
 		return hash;
 	}
 
+	public String getShortHash() {
+		return hash.substring(0, 12);
+	}
+	
 	public long getHeight() {
 		return height;
 	}
