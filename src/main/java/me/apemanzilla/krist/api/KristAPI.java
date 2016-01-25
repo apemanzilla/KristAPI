@@ -1,24 +1,34 @@
 package me.apemanzilla.krist.api;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
 import me.apemanzilla.krist.api.exceptions.MalformedAddressException;
 import me.apemanzilla.krist.api.types.KristAddress;
-import me.apemanzilla.utils.net.HTTPGET;
+import me.apemanzilla.utils.net.SimpleHTTP;
 
 public class KristAPI {
 
+	private final SimpleHTTP http;
+	
 	private final URL syncnode;
 	
 	public KristAPI(URL syncnode) {
+		http = new SimpleHTTP();
 		this.syncnode = syncnode;
 	}
 	
-	public KristAPI() throws IOException {
-		syncnode = new URL(HTTPGET.readUrl(new URL("https://raw.githubusercontent.com/BTCTaras/kristwallet/master/staticapi/syncNode")));
+	public KristAPI() throws IOException, URISyntaxException {
+		http = new SimpleHTTP();
+		syncnode = new URL(http.get(new URI("https://raw.githubusercontent.com/BTCTaras/kristwallet/master/staticapi/syncNode")));
+	}
+	
+	public SimpleHTTP getClient() {
+		return http;
 	}
 	
 	public URL getSyncnode() {
