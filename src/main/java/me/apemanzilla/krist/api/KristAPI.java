@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 import me.apemanzilla.krist.api.exceptions.MalformedAddressException;
 import me.apemanzilla.krist.api.exceptions.SyncnodeDownException;
-import me.apemanzilla.krist.api.types.Block;
+import me.apemanzilla.krist.api.types.KristBlock;
 import me.apemanzilla.krist.api.types.KristAddress;
 import me.apemanzilla.utils.net.HTTPErrorException;
 import me.apemanzilla.utils.net.SimpleHTTP;
@@ -54,11 +54,11 @@ public class KristAPI {
 		}
 	}
 	
-	public Block getLastBlock() throws SyncnodeDownException {
+	public KristBlock getLastBlock() throws SyncnodeDownException {
 		try {
 			String response = http.get(new URL(syncnode, "block/last").toURI());
 			JSONObject json = new JSONObject(response);
-			return new Block(json.getInt("height"), json.getString("address"), json.getString("hash"), json.getInt("value"), json.getInt("time_unix"), this);
+			return new KristBlock(json, this);
 		} catch (IOException e) {
 			throw new SyncnodeDownException();
 		} catch (URISyntaxException e) {
@@ -69,11 +69,11 @@ public class KristAPI {
 		}
 	}
 	
-	public Block getBlock(int id) throws SyncnodeDownException {
+	public KristBlock getBlock(int id) throws SyncnodeDownException {
 		try {
 			String response = http.get(new URL(syncnode, String.format("block/%d", id)).toURI());
 			JSONObject json = new JSONObject(response);
-			return new Block(json.getInt("height"), json.getString("address"), json.getString("hash"), json.getInt("value"), json.getInt("time_unix"), this);
+			return new KristBlock(json, this);
 		} catch (IOException e) {
 			throw new SyncnodeDownException();
 		} catch (URISyntaxException e) {

@@ -3,10 +3,12 @@ package me.apemanzilla.krist.api.types;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.json.JSONObject;
+
 import me.apemanzilla.krist.api.KristAPI;
 import me.apemanzilla.krist.api.exceptions.MalformedAddressException;
 
-public class Block {
+public class KristBlock {
 
 	private KristAddress solver;
 	private final Date time;
@@ -14,7 +16,11 @@ public class Block {
 	private final long height;
 	private final int value;
 	
-	public Block(long height, String address, String hash, int value, int time, KristAPI api) {
+	public KristBlock(JSONObject json, KristAPI api) {
+		this(json.getInt("height"), json.getString("address"), json.getString("hash"), json.getInt("value"), json.getInt("time_unix"), api);
+	}
+	
+	protected KristBlock(long height, String address, String hash, int value, int time, KristAPI api) {
 		this.height = height;
 		try {
 			this.solver = api.getAddress(address);

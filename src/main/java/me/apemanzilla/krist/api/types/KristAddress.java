@@ -5,10 +5,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONObject;
 
 import me.apemanzilla.krist.api.KristAPI;
+import me.apemanzilla.krist.api.exceptions.InvalidNonceException;
 import me.apemanzilla.krist.api.exceptions.SyncnodeDownException;
 import me.apemanzilla.utils.net.HTTPErrorException;
 
@@ -70,6 +73,28 @@ public abstract class KristAddress {
 	public int getFirstSeenUnix() throws SyncnodeDownException {
 		JSONObject json = getAddressInfo();
 		return (json != null ? json.getInt("firstseen_unix") : (int) Calendar.getInstance().getTime().getTime() / 1000);
+	}
+	
+	public boolean submitBlock(String nonce) throws InvalidNonceException, SyncnodeDownException {
+		if (nonce.length() < 1) {
+			throw new InvalidNonceException("Nonce must be at least 1 character long");
+		} else if (nonce.length() > 12) {
+			throw new InvalidNonceException("Nonce must not be longer than 12 characters");
+		}
+		Map<String, String> payload = new HashMap<String, String>();
+		payload.put("address", address);
+		payload.put("nonce", nonce);
+		try {
+			String response = api.getClient().post(new URL(api.getSyncnode(), "submit").toURI(), payload);
+			JSONObject json = new JSONObject(response);
+			return json.getBoolean("success");
+		} catch (IOException e) {
+			throw new SyncnodeDownException();
+		} catch (HTTPErrorException e) {
+			return false;
+		} catch (URISyntaxException e) {
+			return false;
+		}
 	}
 	
 	/**
