@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import me.apemanzilla.krist.api.KristAPI;
 import me.apemanzilla.krist.api.exceptions.SyncnodeDownException;
+import me.apemanzilla.utils.net.HTTPErrorException;
 
 public abstract class KristAddress {
 
@@ -23,52 +24,43 @@ public abstract class KristAddress {
 		return address;
 	}
 
-	public long getBalance() throws SyncnodeDownException {
+	private JSONObject getAddressInfo() throws SyncnodeDownException {
 		try {
 			//String response = SimpleHTTP.readUrl(new URL(api.getSyncnode(), String.format("address/%s", address)));
 			String response = api.getClient().get(new URL(api.getSyncnode(),String.format("address/%s", address)).toURI());
 			JSONObject json = new JSONObject(response);
-			return json.getLong("balance");
+			return json;
 		} catch (IOException e) {
-			e.printStackTrace();
 			throw new SyncnodeDownException();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
-			return 0;
+			return null;
+		} catch (HTTPErrorException e) {
+			return null;
 		}
+	}
+	
+	public long getBalance() throws SyncnodeDownException {
+		JSONObject json = getAddressInfo();
+		return (json != null ? json.getLong("balance") : 0);
 	}
 
 	public Date getFirstSeen() throws SyncnodeDownException {
-		try {
-			String response = api.getClient().get(new URL(api.getSyncnode(), String.format("address/%s", address)).toURI());
-			JSONObject json = new JSONObject(response);
-			Calendar c = Calendar.getInstance();
-			c.setTimeInMillis(json.getInt("firstseen_unix") * 1000L);
-			return c.getTime();
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new SyncnodeDownException();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
+		JSONObject json = getAddressInfo();
+		if (json == null) {
 			return Calendar.getInstance().getTime();
 		}
+		Calendar c = Calendar.getInstance();
+		c.setTimeInMillis(json.getInt("firstseen_unix") * 1000L);
+		return c.getTime();
 	}
 
 	/**
 	 * Lignum wanted this
 	 */
 	public int getFirstSeenUnix() throws SyncnodeDownException {
-		try {
-			String response = api.getClient().get(new URL(api.getSyncnode(), String.format("address/%s", address)).toURI());
-			JSONObject json = new JSONObject(response);
-			return json.getInt("firstseen_unix");
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new SyncnodeDownException();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			return (int) (Calendar.getInstance().getTime().getTime() / 1000);
-		}
+		JSONObject json = getAddressInfo();
+		return (json != null ? json.getInt("firstseen_unix") : (int) Calendar.getInstance().getTime().getTime() / 1000);
 	}
 	
 	/**

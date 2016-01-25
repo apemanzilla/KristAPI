@@ -27,12 +27,12 @@ public class SimpleHTTP {
 		client = HttpClients.custom().setUserAgent(userAgent).build();
 	}
 	
-	public String get(URI uri) throws IOException {
+	public String get(URI uri) throws IOException, HTTPErrorException {
 		HttpGet get = new HttpGet(uri);
 		try {
 			CloseableHttpResponse res = client.execute(get);
 			if (res.getStatusLine().getStatusCode() != 200) {
-				throw new IOException(String.format("Expected status code 200, got status code %s.", res.getStatusLine().getStatusCode()));
+				throw new HTTPErrorException(String.format("Expected status code 200, got status code %s.", res.getStatusLine().getStatusCode()));
 			} else {
 				InputStream is = res.getEntity().getContent();
 				String data = IOUtils.toString(is);
@@ -45,7 +45,7 @@ public class SimpleHTTP {
 		}
 	}
 	
-	public String post(URI uri, Map<String, String> payload) throws IOException {
+	public String post(URI uri, Map<String, String> payload) throws IOException, HTTPErrorException {
 		String payload_enc = new JSONObject(payload).toString();
 		HttpPost post = new HttpPost(uri);
 		try {
@@ -56,7 +56,7 @@ public class SimpleHTTP {
 		}
 		CloseableHttpResponse res = client.execute(post);
 		if (res.getStatusLine().getStatusCode() != 200) {
-			throw new IOException(String.format("Expected status code 200, got status code %s.", res.getStatusLine().getStatusCode()));
+			throw new HTTPErrorException(String.format("Expected status code 200, got status code %s.", res.getStatusLine().getStatusCode()));
 		} else {
 			InputStream is = res.getEntity().getContent();
 			String data = IOUtils.toString(is);

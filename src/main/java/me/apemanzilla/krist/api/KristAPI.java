@@ -9,6 +9,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import me.apemanzilla.krist.api.exceptions.MalformedAddressException;
 import me.apemanzilla.krist.api.types.KristAddress;
+import me.apemanzilla.utils.net.HTTPErrorException;
 import me.apemanzilla.utils.net.SimpleHTTP;
 
 public class KristAPI {
@@ -22,7 +23,7 @@ public class KristAPI {
 		this.syncnode = syncnode;
 	}
 	
-	public KristAPI() throws IOException, URISyntaxException {
+	public KristAPI() throws IOException, URISyntaxException, HTTPErrorException {
 		http = new SimpleHTTP();
 		syncnode = new URL(http.get(new URI("https://raw.githubusercontent.com/BTCTaras/kristwallet/master/staticapi/syncNode")));
 	}
