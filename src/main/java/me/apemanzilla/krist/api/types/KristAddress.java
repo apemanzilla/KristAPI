@@ -26,7 +26,6 @@ public abstract class KristAddress {
 
 	private JSONObject getAddressInfo() throws SyncnodeDownException {
 		try {
-			//String response = SimpleHTTP.readUrl(new URL(api.getSyncnode(), String.format("address/%s", address)));
 			String response = api.getClient().get(new URL(api.getSyncnode(),String.format("address/%s", address)).toURI());
 			JSONObject json = new JSONObject(response);
 			return json;
@@ -81,5 +80,10 @@ public abstract class KristAddress {
 	 */
 	public boolean isSpecial() {
 		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("Address %s", address);
 	}
 }

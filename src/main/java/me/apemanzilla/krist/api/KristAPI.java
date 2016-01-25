@@ -6,8 +6,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.json.JSONObject;
 
 import me.apemanzilla.krist.api.exceptions.MalformedAddressException;
+import me.apemanzilla.krist.api.exceptions.SyncnodeDownException;
+import me.apemanzilla.krist.api.types.Block;
 import me.apemanzilla.krist.api.types.KristAddress;
 import me.apemanzilla.utils.net.HTTPErrorException;
 import me.apemanzilla.utils.net.SimpleHTTP;
@@ -34,6 +37,51 @@ public class KristAPI {
 	
 	public URL getSyncnode() {
 		return syncnode;
+	}
+	
+	public long getWork() throws SyncnodeDownException {
+		try {
+			String response = http.get(new URL(syncnode, "work").toURI());
+			JSONObject json = new JSONObject(response);
+			return json.getLong("work");
+		} catch (IOException e) {
+			throw new SyncnodeDownException();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			return 0;
+		} catch (HTTPErrorException e) {
+			return 0;
+		}
+	}
+	
+	public Block getLastBlock() throws SyncnodeDownException {
+		try {
+			String response = http.get(new URL(syncnode, "block/last").toURI());
+			JSONObject json = new JSONObject(response);
+			return new Block(json.getInt("height"), json.getString("address"), json.getString("hash"), json.getInt("value"), json.getInt("time_unix"), this);
+		} catch (IOException e) {
+			throw new SyncnodeDownException();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			return null;
+		} catch (HTTPErrorException e) {
+			return null;
+		}
+	}
+	
+	public Block getBlock(int id) throws SyncnodeDownException {
+		try {
+			String response = http.get(new URL(syncnode, String.format("block/%d", id)).toURI());
+			JSONObject json = new JSONObject(response);
+			return new Block(json.getInt("height"), json.getString("address"), json.getString("hash"), json.getInt("value"), json.getInt("time_unix"), this);
+		} catch (IOException e) {
+			throw new SyncnodeDownException();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			return null;
+		} catch (HTTPErrorException e) {
+			return null;
+		}
 	}
 	
 	private static String privateKey(String password) {
