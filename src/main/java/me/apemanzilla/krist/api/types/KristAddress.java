@@ -44,6 +44,16 @@ public abstract class KristAddress {
 		JSONObject json = getAddressInfo();
 		return (json != null ? json.getLong("balance") : 0);
 	}
+	
+	public long getTotalIn() throws SyncnodeDownException {
+		JSONObject json = getAddressInfo();
+		return (json != null ? json.getLong("totalin") : 0);
+	}
+	
+	public long getTotalOut() throws SyncnodeDownException {
+		JSONObject json = getAddressInfo();
+		return (json != null ? json.getLong("totalout") : 0);
+	}
 
 	public Date getFirstSeen() throws SyncnodeDownException {
 		JSONObject json = getAddressInfo();
