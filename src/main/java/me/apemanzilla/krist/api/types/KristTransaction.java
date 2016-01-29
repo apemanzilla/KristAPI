@@ -18,8 +18,9 @@ public class KristTransaction {
     protected long id;
     protected JSONObject transactionData;
 
-    public KristTransaction(long id) throws KristException {
+    public KristTransaction(KristAPI api, long id) throws KristException {
         this.id = id;
+        this.api = api;
         transactionData = getTransactionData();
     }
 
@@ -31,7 +32,7 @@ public class KristTransaction {
 
     private JSONObject getTransactionData() throws KristException {
         try {
-            String response = api.getClient().get(new URL(api.getSyncnode(), "transactions/" + id).toURI());
+            String response = api.getClient().get(new URL(api.getSyncnode(), "transaction/" + id).toURI());
             JSONObject obj = new JSONObject(response);
             checkResponse(obj);
             return obj;
@@ -55,7 +56,7 @@ public class KristTransaction {
     }
 
     public KristAddress getSender() throws MalformedAddressException {
-        if (transactionData.get("from") == null) {
+        if (transactionData.isNull("from")) {
             return api.makeVirtualAddress("Mining Reward");
         }
 
@@ -73,7 +74,7 @@ public class KristTransaction {
     }
 
     public long getTimeUnix() {
-        return transactionData.getLong("firstseen_unix");
+        return transactionData.getLong("time_unix");
     }
 
     public String getOP() {

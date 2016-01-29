@@ -161,7 +161,8 @@ public class KristAPI {
 	}
 
 	public KristTransaction getTransaction(long id) throws KristException {
-		return new KristTransaction(id);
+		KristTransaction transaction =  new KristTransaction(this, id);
+		return transaction;
 	}
 
 	private class KristAddressV1 extends KristAddress {
