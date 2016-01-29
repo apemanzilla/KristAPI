@@ -1,19 +1,22 @@
 package me.apemanzilla.krist.api;
 
+import me.apemanzilla.krist.api.exceptions.InvalidNonceException;
+import me.apemanzilla.krist.api.exceptions.KristException;
+import me.apemanzilla.krist.api.exceptions.MalformedAddressException;
+import me.apemanzilla.krist.api.exceptions.SyncnodeDownException;
+import me.apemanzilla.krist.api.types.KristAddress;
+import me.apemanzilla.krist.api.types.KristBlock;
+import me.apemanzilla.krist.api.types.KristTransaction;
+import me.apemanzilla.utils.net.HTTPErrorException;
+import me.apemanzilla.utils.net.SimpleHTTP;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.json.JSONObject;
-
-import me.apemanzilla.krist.api.exceptions.MalformedAddressException;
-import me.apemanzilla.krist.api.exceptions.SyncnodeDownException;
-import me.apemanzilla.krist.api.types.KristBlock;
-import me.apemanzilla.krist.api.types.KristAddress;
-import me.apemanzilla.utils.net.HTTPErrorException;
-import me.apemanzilla.utils.net.SimpleHTTP;
+import java.util.Date;
 
 public class KristAPI {
 
@@ -38,7 +41,7 @@ public class KristAPI {
 	public URL getSyncnode() {
 		return syncnode;
 	}
-	
+
 	public long getWork() throws SyncnodeDownException {
 		try {
 			String response = http.get(new URL(syncnode, "work").toURI());
@@ -152,7 +155,15 @@ public class KristAPI {
 	public KristAddress loginV2(String password) {
 		return new KristAddressV2(password.toCharArray(), this);
 	}
-	
+
+	public KristAddress makeVirtualAddress(String name) {
+		return new KristVirtualAddress(name);
+	}
+
+	public KristTransaction getTransaction(long id) throws KristException {
+		return new KristTransaction(id);
+	}
+
 	private class KristAddressV1 extends KristAddress {
 		
 		private KristAddressV1(String address, KristAPI api) {
@@ -177,6 +188,54 @@ public class KristAPI {
 			this.api = api;
 			this.pkey = privateKey(new String(password));
 			this.address = getAddressV2(pkey);
+		}
+	}
+
+	private class KristVirtualAddress extends KristAddress {
+		private String name;
+
+		public KristVirtualAddress(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String getAddress() {
+			return name;
+		}
+
+		@Override
+		public long getBalance() throws SyncnodeDownException {
+			return Long.MAX_VALUE;
+		}
+
+		@Override
+		public long getTotalIn() throws SyncnodeDownException {
+			return Long.MAX_VALUE;
+		}
+
+		@Override
+		public long getTotalOut() throws SyncnodeDownException {
+			return Long.MAX_VALUE;
+		}
+
+		@Override
+		public Date getFirstSeen() throws SyncnodeDownException {
+			return new Date();
+		}
+
+		@Override
+		public int getFirstSeenUnix() throws SyncnodeDownException {
+			return 0;
+		}
+
+		@Override
+		public boolean submitBlock(String nonce) throws InvalidNonceException, SyncnodeDownException {
+			return false;
+		}
+
+		@Override
+		public boolean isSpecial() {
+			return true;
 		}
 	}
 	

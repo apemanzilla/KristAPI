@@ -1,10 +1,5 @@
 package me.apemanzilla.utils.net;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -14,6 +9,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.Map;
 
 public class SimpleHTTP {
 
@@ -40,7 +41,9 @@ public class SimpleHTTP {
 				res.close();
 				return data;
 			}
-		} catch (UnsupportedOperationException | ClientProtocolException e) {
+		} catch (UnsupportedOperationException e) {
+			throw new IOException(e);
+		} catch (ClientProtocolException e) {
 			throw new IOException(e);
 		}
 	}
