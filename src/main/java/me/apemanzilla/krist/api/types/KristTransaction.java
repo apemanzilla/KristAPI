@@ -18,6 +18,12 @@ public class KristTransaction {
     protected long id;
     protected JSONObject transactionData;
 
+    public static final String REWARD_SENDER_NAME = "Mining Reward";
+
+    public KristTransaction() {
+
+    }
+
     public KristTransaction(KristAPI api, long id) throws KristException {
         this.id = id;
         this.api = api;
@@ -57,7 +63,7 @@ public class KristTransaction {
 
     public KristAddress getSender() throws MalformedAddressException {
         if (transactionData.isNull("from")) {
-            return api.makeVirtualAddress("Mining Reward");
+            return api.makeVirtualAddress(REWARD_SENDER_NAME);
         }
 
         return api.getAddress(transactionData.getString("from"));
@@ -78,6 +84,6 @@ public class KristTransaction {
     }
 
     public String getOP() {
-        return transactionData.getString("op");
+        return (!transactionData.isNull("op") ? transactionData.getString("op") : null);
     }
 }

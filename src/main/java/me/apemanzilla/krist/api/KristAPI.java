@@ -10,13 +10,17 @@ import me.apemanzilla.krist.api.types.KristTransaction;
 import me.apemanzilla.utils.net.HTTPErrorException;
 import me.apemanzilla.utils.net.SimpleHTTP;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class KristAPI {
 
@@ -163,6 +167,96 @@ public class KristAPI {
 	public KristTransaction getTransaction(long id) throws KristException {
 		KristTransaction transaction =  new KristTransaction(this, id);
 		return transaction;
+	}
+
+	private class KristStaticTransaction extends KristTransaction {
+		protected KristAddress recipient, sender;
+		protected long value, unixTime;
+		protected String op;
+
+		public KristStaticTransaction(long id, long value, long time, KristAddress from, KristAddress to, String op) {
+			this.id = id;
+			this.value = value;
+			this.unixTime = time;
+			this.sender = from;
+			this.recipient = to;
+		}
+
+		@Override
+		public KristAddress getRecipient() throws MalformedAddressException {
+			return recipient;
+		}
+
+		@Override
+		public KristAddress getSender() throws MalformedAddressException {
+			return sender;
+		}
+
+		@Override
+		public long getValue() {
+			return value;
+		}
+
+		@Override
+		public Date getTime() {
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTimeInMillis(unixTime * 1000L);
+			return calendar.getTime();
+		}
+
+		@Override
+		public long getTimeUnix() {
+			return unixTime;
+		}
+
+		@Override
+		public String getOP() {
+			return op;
+		}
+	}
+
+	public KristTransaction[] getTransactions() throws KristException {
+		try {
+			String response = http.get(new URL(syncnode, "transactions").toURI());
+			JSONObject json = new JSONObject(response);
+
+			if (!json.getBoolean("ok")) {
+				throw new KristException("getTransactions call request was not ok!");
+			}
+
+			JSONArray array = json.getJSONArray("transactions");
+			List<KristTransaction> transactions = new ArrayList<KristTransaction>();
+
+			for (int i = 0; i < array.length(); ++i) {
+				JSONObject transaction = array.getJSONObject(i);
+				KristAddress fromAddr = null;
+
+				if (transaction.isNull("from")) {
+					fromAddr = makeVirtualAddress(KristTransaction.REWARD_SENDER_NAME);
+				} else {
+					fromAddr = getAddress(transaction.getString("from"));
+				}
+
+				transactions.add(new KristStaticTransaction(
+					transaction.getLong("id"),
+					transaction.getLong("value"),
+					transaction.getLong("time_unix"),
+					fromAddr,
+					getAddress(transaction.getString("to")),
+					!transaction.isNull("op") ? transaction.getString("op") :  null
+				));
+			}
+
+			return transactions.toArray(new KristTransaction[0]);
+		} catch (IOException e) {
+			throw new SyncnodeDownException();
+		} catch (HTTPErrorException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 	private class KristAddressV1 extends KristAddress {

@@ -1,6 +1,7 @@
 package me.apemanzilla.krist.api.test;
 
 import me.apemanzilla.krist.api.KristAPI;
+import me.apemanzilla.krist.api.exceptions.KristException;
 import me.apemanzilla.krist.api.exceptions.SyncnodeDownException;
 import me.apemanzilla.krist.api.types.KristTransaction;
 import me.apemanzilla.utils.net.HTTPErrorException;
@@ -33,6 +34,23 @@ public class TransactionTest {
         } catch (Exception e) {
             e.printStackTrace();
             Assert.assertTrue(false);
+        }
+    }
+
+    @Test
+    public void recentTransactionsTest() throws KristException {
+        // Also can't do real testing here, so let's just hope it doesn't crash! :)
+        KristTransaction[] transactions = kapi.getTransactions();
+
+        System.out.println("Current recent transactions:");
+
+        for (KristTransaction t : transactions) {
+            System.out.println(
+                t.getID() + " : Value of " + t.getValue() +
+                ", performed on " + t.getTime().toString() +
+                ", from " + t.getSender().getAddress() +
+                " to " + t.getRecipient().getAddress()
+            );
         }
     }
 }
