@@ -26,3 +26,9 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+# IntelliJ IDEA
+.idea
+*.ipr
+*.eml
+*.iml

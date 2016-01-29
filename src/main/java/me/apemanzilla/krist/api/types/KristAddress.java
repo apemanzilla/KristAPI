@@ -1,5 +1,12 @@
 package me.apemanzilla.krist.api.types;
 
+import me.apemanzilla.krist.api.KristAPI;
+import me.apemanzilla.krist.api.exceptions.InvalidNonceException;
+import me.apemanzilla.krist.api.exceptions.KristException;
+import me.apemanzilla.krist.api.exceptions.SyncnodeDownException;
+import me.apemanzilla.utils.net.HTTPErrorException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -7,13 +14,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.json.JSONObject;
-
-import me.apemanzilla.krist.api.KristAPI;
-import me.apemanzilla.krist.api.exceptions.InvalidNonceException;
-import me.apemanzilla.krist.api.exceptions.SyncnodeDownException;
-import me.apemanzilla.utils.net.HTTPErrorException;
 
 public abstract class KristAddress {
 
@@ -27,10 +27,17 @@ public abstract class KristAddress {
 		return address;
 	}
 
-	private JSONObject getAddressInfo() throws SyncnodeDownException {
+	private static void checkResponse(JSONObject json) throws KristException {
+		if (!json.getBoolean("ok")) {
+			throw new KristException("address request was not ok!");
+		}
+	}
+
+	private JSONObject getAddressInfo() throws KristException {
 		try {
 			String response = api.getClient().get(new URL(api.getSyncnode(),String.format("address/%s", address)).toURI());
 			JSONObject json = new JSONObject(response);
+			checkResponse(json);
 			return json;
 		} catch (IOException e) {
 			throw new SyncnodeDownException();
@@ -42,22 +49,22 @@ public abstract class KristAddress {
 		}
 	}
 	
-	public long getBalance() throws SyncnodeDownException {
+	public long getBalance() throws KristException {
 		JSONObject json = getAddressInfo();
 		return (json != null ? json.getLong("balance") : 0);
 	}
 	
-	public long getTotalIn() throws SyncnodeDownException {
+	public long getTotalIn() throws KristException {
 		JSONObject json = getAddressInfo();
 		return (json != null ? json.getLong("totalin") : 0);
 	}
 	
-	public long getTotalOut() throws SyncnodeDownException {
+	public long getTotalOut() throws KristException {
 		JSONObject json = getAddressInfo();
 		return (json != null ? json.getLong("totalout") : 0);
 	}
 
-	public Date getFirstSeen() throws SyncnodeDownException {
+	public Date getFirstSeen() throws KristException {
 		JSONObject json = getAddressInfo();
 		if (json == null) {
 			return Calendar.getInstance().getTime();
@@ -69,8 +76,10 @@ public abstract class KristAddress {
 
 	/**
 	 * Lignum wanted this
+	 *
+	 * I wanted this. - Lignum
 	 */
-	public int getFirstSeenUnix() throws SyncnodeDownException {
+	public int getFirstSeenUnix() throws KristException {
 		JSONObject json = getAddressInfo();
 		return (json != null ? json.getInt("firstseen_unix") : (int) Calendar.getInstance().getTime().getTime() / 1000);
 	}
@@ -109,6 +118,6 @@ public abstract class KristAddress {
 	
 	@Override
 	public String toString() {
-		return String.format("Address %s", address);
+		return String.format("Address %s", getAddress());
 	}
 }
